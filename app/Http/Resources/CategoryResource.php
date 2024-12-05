@@ -16,6 +16,7 @@ class CategoryResource extends JsonResource
     {
 
             $data = [
+                'id'=>$this->id,
                 'name'=>$this->name,
                 'slug'=>$this->slug,
                 'status'=>$this->status(),

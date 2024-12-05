@@ -18,6 +18,7 @@ class CommentResource extends JsonResource
             'comment'=>$this->comment,
             'user-name'=>$this->user->name,
             'user-image'=>asset($this->user->image),
+            'created_date'=>$this->created_at->diffForHumans(),
         ];
     }
 }

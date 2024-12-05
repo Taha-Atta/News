@@ -69,3 +69,4 @@ class Kernel extends HttpKernel
         'CheckStatusAdmin' => \App\Http\Middleware\CheckStatusAdmin::class,
     ];
 }
+ 

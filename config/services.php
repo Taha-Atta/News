@@ -31,17 +31,17 @@ return [
         'region' => env('AWS_DEFAULT_REGION', 'us-east-1'),
     ],
 
-    'google' => [
-    'client_id' => '313797940949-h5t95o53946q06qbihqf4a0r63ig4pu3.apps.googleusercontent.com',
-    'client_secret' => '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',
-    'redirect' => 'http://localhost:8000/auth/google/callback',
-    ],
+    // 'google' => [
+    // 'client_id' => '313797940949-h5t95o53946q06qbihqf4a0r63ig4pu3.apps.googleusercontent.com',
+    // 'client_secret' => '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',
+    // 'redirect' => 'http://localhost:8000/auth/google/callback',
+    // ],
 
 
-    'facebook' => [
-    'client_id' => '909216711303019',
-    'client_secret' => 'f10cc9b8abe3155d317e1eda4bf3b513',
-    'redirect' => 'http://localhost:8000/auth/facebook/callback',
-    ],
+    // 'facebook' => [
+    // 'client_id' => '909216711303019',
+    // 'client_secret' => 'f10cc9b8abe3155d317e1eda4bf3b513',
+    // 'redirect' => 'http://localhost:8000/auth/facebook/callback',
+    // ],
 
 ];

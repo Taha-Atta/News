@@ -24,8 +24,10 @@ class ImageFactory extends Factory
     public function definition(): array
     {
         $date = fake()->date('Y-m-d h:m:s');
+        $paths = ['test/1.jpg','test/2.jpg','test/3.jpg','test/4.jpg','test/5.jpg','test/6.jpg','test/7.jpg',
+                    'test/8.jpg','test/9.webp','test/10.webp','test/11.jpg','test/12.jpg'];
         return [
-            'path'=>fake()->imageUrl(),
+            'path'=>fake()->randomElement($paths),
             'created_at'=>$date,
             'updated_at'=>$date,
         ];

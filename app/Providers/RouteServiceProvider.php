@@ -8,6 +8,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Route;
 
+use function App\Http\ApiResponse;
+
 class RouteServiceProvider extends ServiceProvider
 {
     /**
@@ -27,7 +29,26 @@ class RouteServiceProvider extends ServiceProvider
     public function boot(): void
     {
         RateLimiter::for('api', function (Request $request) {
-            return Limit::perMinute(60)->by($request->user()?->id ?: $request->ip());
+            return Limit::perMinute(20)->by($request->user()?->id ?: $request->ip())->response(function () {
+                return ApiResponse(429, 'Try again after minute');
+            });
+        });
+
+        RateLimiter::for('contact', function (Request $request) {
+            return Limit::perMinute(1)->by($request->ip())->response(function () {
+                return ApiResponse(429, 'Try again after minute');
+            });
+        });
+
+        RateLimiter::for('comments',function (Request $request){
+            return Limit::perMinute(1)->by($request->ip())->response(function(){
+                return ApiResponse(429,'Try Again after Minute');
+            });
+        });
+        RateLimiter::for('user',function (Request $request){
+            return Limit::perMinute(1)->by($request->ip())->response(function(){
+                return ApiResponse(429,'Try Again after Minute');
+            });
         });
 
         $this->routes(function () {

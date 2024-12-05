@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\RateLimiter;
 
 use function App\Http\ApiResponse;
 
@@ -19,9 +20,19 @@ class LoginController extends Controller
             'password' => 'required|min:8',
         ]);
 
+        if(RateLimiter::tooManyAttempts($request->ip(),2)){
+            $time = RateLimiter::availableIn($request->ip());
+            return ApiResponse(429,'try agian after '. $time . ' seconds');
+        }
+
+        $remain = RateLimiter::remaining($request->ip(),2);
+
+        RateLimiter::increment($request->ip());
+
         $user = User::where('email', $request->email)->first();
         if ($user && Hash::check($request->password, $user->password)) {
-            $token = $user->createToken('user_token')->plainTextToken;
+            RateLimiter::clear($request->ip());
+            $token = $user->createToken('user_token',[],now()->addMinute(60))->plainTextToken;
             return ApiResponse(200, 'user login successfuly', ['token' => $token]);
         }
 
@@ -31,7 +42,7 @@ class LoginController extends Controller
 
         //     return ApiResponse(200,'user login successfuly',['token'=>$token]);
         // }
-        return ApiResponse(404, 'info wrong');
+        return ApiResponse(404, 'info wrong',['remain'=> $remain]);
     }
 
 

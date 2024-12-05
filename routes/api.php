@@ -1,12 +1,21 @@
 <?php
 
-use App\Http\Controllers\Api\Auth\LoginController;
-use App\Http\Controllers\Api\CategoryController;
+use Illuminate\Http\Request;
+use App\Http\Resources\UserResource;
+use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Api\OtpController;
 use App\Http\Controllers\Api\ContactController;
 use App\Http\Controllers\Api\GeneralController;
 use App\Http\Controllers\Api\SettingController;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Api\CategoryController;
+use App\Http\Controllers\Api\Auth\LoginController;
+use App\Http\Controllers\Api\Account\PostController;
+use App\Http\Controllers\Api\Password\ResetPassword;
+use App\Http\Controllers\Api\Auth\RegisterController;
+use App\Http\Controllers\Api\Password\ForgetPassword;
+use App\Http\Controllers\Api\Account\GetUserController;
+use App\Http\Controllers\Api\Account\NotificationController;
+use App\Http\Controllers\Api\Account\SettingController as AccountSettingController;
 
 /*
 |--------------------------------------------------------------------------
@@ -19,26 +28,70 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::post('auth/login',[LoginController::class,'login']);
-Route::delete('auth/logout',[LoginController::class,'logout'])->middleware('auth:sanctum');
+//****************************Register route *************************/
+Route::post('auth/register', [RegisterController::class, 'register']);
 
-Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-    return $request->user();
+//****************************login route *************************/
+Route::controller(LoginController::class)->group(function () {
+    Route::post('auth/login', 'login');
+    Route::delete('auth/logout', 'logout')->middleware('auth:sanctum');
+});
+//****************************verify Email route *************************/
+Route::controller(OtpController::class)->middleware('auth:sanctum')->group(function () {
+    Route::post('auth/verify/email', 'verifyEmail');
+    Route::get('auth/send/code/agian', 'sendCodeAgian');
+});
+//****************************forgetpassword route *************************/
+Route::controller(ForgetPassword::class)->group(function () {
+    Route::post('forget/password', 'forgetPassword');
+});
+//****************************rest password route *************************/
+Route::controller(ResetPassword::class)->group(function () {
+    Route::post('reset/password', 'resetPassword');
+});
+//**********************************User Account***************************************** */
+Route::middleware(['auth:sanctum','checkstatus'])->prefix('account')->group(function () {
+
+
+    // Route::get('/user', function (Request $request) {
+    //     return new UserResource($request->user());});
+    Route::get('/user',[GetUserController::class,'getUser']);
+
+    Route::put('setting/{user_id}',[AccountSettingController::class,'updateSetting']);
+    Route::put('password/{user_id}',[AccountSettingController::class,'updatePassword']);
+    Route::controller(PostController::class)->prefix('posts')->group(function () {
+        Route::get('/',                                'getPosts');
+        Route::post('/store',                          'storePosts');
+        Route::put('/update/{podt_id}',                'updatePost');
+        Route::delete('/delete/{post_id}',             'deletePost');
+
+        Route::get('/comments/{post_id}',               'getPostComments');
+        Route::post('/store/comment',                   'storePostComment');
+
+    Route::get('/get/notification',[NotificationController::class,'getNotification']);
+    Route::get('/read/notification/{id}',[NotificationController::class,'ReadNotification']);
+});
 });
 
-Route::get('posts',[GeneralController::class,'posts']);
-Route::get('posts/show/{slug}',[GeneralController::class,'showPost']);
-Route::get('posts/comment/{slug}',[GeneralController::class,'showPostComment']);
 
+//****************************Home Page route *************************/
+Route::controller(GeneralController::class)->group(function () {
 
-Route::post('posts/search',[GeneralController::class,'shearchPosts']);
+    Route::get('posts', 'posts');
+    Route::get('posts/show/{slug}', 'showPost');
+    Route::get('posts/comment/{slug}', 'showPostComment');
+    Route::post('posts/search', 'shearchPosts');
+});
 
-//****************************category route */
-Route::get('categories',[CategoryController::class,'allCategories']);
-Route::get('categories/{slug}/posts',[CategoryController::class,'CategoriesPosts']);
+//****************************category route *************************/
+Route::controller(CategoryController::class)->group(function () {
 
-//****************************contact us route */
-Route::post('contact/store',[ContactController::class,'Contact']);
+    Route::get('categories', 'allCategories');
+    Route::get('categories/{slug}/posts', 'CategoriesPosts');
+});
 
-//****************************setting route */
-Route::get('setting',[SettingController::class,'showSetting']);
+//****************************contact us route ***********************/
+Route::post('contact/store', [ContactController::class, 'Contact'])->middleware('throttle:contact');
+
+//****************************setting route ***************************/
+Route::get('setting', [SettingController::class, 'showSetting']);
